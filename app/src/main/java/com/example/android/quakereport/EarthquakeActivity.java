@@ -15,16 +15,30 @@
  */
 package com.example.android.quakereport;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EarthquakeActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+
+    private EarthquakeAdapter adapter;
+
+
+    /** Sample JSON response for a USGS query */
+    private static final String SAMPLE_JSON_URL =
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +46,51 @@ public class EarthquakeActivity extends AppCompatActivity {
         setContentView(R.layout.earthquake_activity);
 
         // Create a fake list of earthquake locations.
-        ArrayList<Earthquake> earthquakes=QueryUtils.extractEarthquakes();
 
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
         // Create a new {@link ArrayAdapter} of earthquakes
-        EarthquakeAdapter adapter = new EarthquakeAdapter(
-                this, R.layout.earthquake_activity, earthquakes);
+         adapter = new EarthquakeAdapter(
+                this, R.layout.earthquake_activity, new ArrayList<Earthquake>());
 
         earthquakeListView.setAdapter(adapter);
+
+        new EarthquakeAsyncTask().execute(SAMPLE_JSON_URL);
+
+    }
+
+    private class EarthquakeAsyncTask extends AsyncTask<String,Void,List<Earthquake>>{
+
+        @Override
+        protected List<Earthquake> doInBackground(String... urls) {
+
+            URL url=QueryUtils.createUrl(urls[0]);
+            try {
+                String jsonResponce= QueryUtils.makeHttpRequest(url);
+                ArrayList<Earthquake> earthquakes=QueryUtils.extractEarthquakes(jsonResponce);
+                return earthquakes;
+            } catch (IOException e) {
+                Log.e(LOG_TAG,"No problemo",e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<Earthquake> data) {
+            adapter.clear();
+            adapter.addAll(data);
+            adapter.notifyDataSetChanged();
+        }
+
+
+        /**
+         * Returns a formatted date and time string for when the earthquake happened.
+         */
+        public String getDateString(long timeInMilliseconds) {
+            SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy 'at' HH:mm:ss z");
+            return formatter.format(timeInMilliseconds);
+        }
 
     }
 }
