@@ -112,8 +112,6 @@ public class QueryUtils {
      */
     public static ArrayList<Earthquake> extractEarthquakes(String jsonResponce) {
 
-
-
         // Create an empty ArrayList that we can start adding earthquakes to
         ArrayList<Earthquake> earthquakes = new ArrayList<>();
 
@@ -134,7 +132,7 @@ public class QueryUtils {
                 String location=properties.getString("place");
                 Long time=properties.getLong("time");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "url",This applies when you want to retrieve the url.
                 String url = properties.getString("url");
 
                 Earthquake earthquake=new Earthquake(mag,location,time);

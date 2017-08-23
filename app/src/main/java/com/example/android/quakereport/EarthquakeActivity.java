@@ -15,10 +15,13 @@
  */
 package com.example.android.quakereport;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -82,15 +85,22 @@ public class EarthquakeActivity extends AppCompatActivity {
             adapter.addAll(data);
             adapter.notifyDataSetChanged();
         }
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main,menu);
 
-        /**
-         * Returns a formatted date and time string for when the earthquake happened.
-         */
-        public String getDateString(long timeInMilliseconds) {
-            SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy 'at' HH:mm:ss z");
-            return formatter.format(timeInMilliseconds);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id=item.getItemId();
+        if(id== R.id.action_settings){
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
         }
-
+        return super.onOptionsItemSelected(item);
     }
 }
